@@ -6,6 +6,15 @@ execute "install_td-agent" do
   notifies :restart, "service[td-agent]"
 end
 
+execute "td-agent_chown" do
+  command "chown -R td-agent:td-agent /etc/td-agent"
+end
+
+files "/etc/td-agent/td-agent.conf" do
+  owner "td-agent"
+  group "td-agent"
+end
+
 service "td-agent" do
   action [:enable, :start]
 end

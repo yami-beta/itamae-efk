@@ -21,6 +21,10 @@ end
 
 package "elasticsearch"
 
+execute "elasticsearch_chown" do
+  command "chown -R elasticsearch:elasticsearch /etc/elasticsearch"
+end
+
 service "elasticsearch" do
   action [:enable, :start]
 end
