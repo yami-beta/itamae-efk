@@ -13,7 +13,7 @@ execute "kibana_chown" do
 end
 
 template "/opt/kibana/config/kibana.yml" do
-  ownder "kibana"
+  owner "kibana"
   group "kibana"
   notifies :restart, "service[kibana]"
 end
