@@ -1,66 +1,23 @@
-# nodejs
-execute "nodejs_pre_setup" do
-  command "curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -"
+execute "kibana_add_repo" do
+  command <<-EOS
+    wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+    echo "deb http://packages.elastic.co/kibana/4.5/debian stable main" | sudo tee -a /etc/apt/sources.list
+    apt-get update
+  EOS
 end
 
-package "nodejs"
+package "kibana"
 
-execute "install_forever" do
-  command "npm install -g forever"
-  not_if "npm ls -g forever"
+execute "kibana_chown" do
+  command "chown -R kibana:kibana /opt/kibana"
 end
 
-
-# kibana
-node.reverse_merge!(
-  kibana: {
-    filename: "kibana-4.3.0-linux-x64.tar.gz",
-    url: "https://download.elastic.co/kibana/kibana",
-    install_dir: "/opt/kibana",
-    tmp_dir: "/tmp/kibana",
-  }
-)
-
-directory "#{node[:kibana][:tmp_dir]}" do
-  action :create
-end
-
-remote_file "#{node[:kibana][:tmp_dir]}/#{node[:kibana][:filename]}"
-
-execute "get_kibana" do
-  command "wget #{node[:kibana][:url]}/#{node[:kibana][:filename]}"
-  cwd node[:kibana][:tmp_dir]
-  not_if "test -f #{node[:kibana][:tmp_dir]}/#{node[:kibana][:filename]}"
-end
-
-directory "#{node[:kibana][:install_dir]}"
-
-execute "extract_kibana" do
-  command "tar zxf #{node[:kibana][:filename]} -C #{node[:kibana][:install_dir]} --strip-components 1"
-  cwd node[:kibana][:tmp_dir]
-  only_if "test -d #{node[:kibana][:install_dir]}"
-  not_if "test -f #{node[:kibana][:install_dir]}/bin/kibana"
-end
-
-execute "install_sense_plugin" do
-  command "bin/kibana plugin --install elastic/sense"
-  cwd node[:kibana][:install_dir]
-  notifies :restart, "service[kibana]"
-  not_if "test -d #{node[:kibana][:install_dir]}/installedPlugins/sense"
-end
-
-template "/etc/init.d/kibana" do
-  mode "755"
-  owner "root"
-  group "root"
-end
-
-template "#{node[:kibana][:install_dir]}/config/kibana.yml" do
-  source "templates/kibana.yml.erb"
+template "/opt/kibana/config/kibana.yml" do
+  ownder "kibana"
+  group "kibana"
   notifies :restart, "service[kibana]"
 end
 
 service "kibana" do
   action [:enable, :start]
 end
-

@@ -13,7 +13,7 @@ server.host: "<%= node["kibana"]["host"] %>"
 # server.basePath: ""
 
 # The Elasticsearch instance to use for all your queries.
-elasticsearch.url: "<%= node["elasticsearch"]["host"] %>:<%= node["elasticsearch"]["port"] %>"
+elasticsearch.url: "<%= node["elasticsearch"]["protocol"] %>://<%= node["elasticsearch"]["host"] %>:<%= node["elasticsearch"]["port"] %>"
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.
