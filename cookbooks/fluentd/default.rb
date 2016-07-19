@@ -10,7 +10,7 @@ execute "td-agent_chown" do
   command "chown -R td-agent:td-agent /etc/td-agent"
 end
 
-file "/etc/td-agent/td-agent.conf" do
+remote_file "/etc/td-agent/td-agent.conf" do
   owner "td-agent"
   group "td-agent"
 end
